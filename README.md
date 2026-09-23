@@ -1,6 +1,6 @@
 # RouterOS Voucher Manager
 
-A Tkinter GUI for batch-creating MikroTik User Manager hotspot vouchers, generating a printable PDF, and (optionally) running automatically at login.
+A Tkinter GUI for batch-creating MikroTik User Manager hotspot vouchers, and generating a printable PDF.
 
 ## What it does
 
@@ -10,7 +10,12 @@ A Tkinter GUI for batch-creating MikroTik User Manager hotspot vouchers, generat
 - Batch-creates User Manager accounts, attaches each one to the selected profile via `/user-manager/user-profile/add`, then triggers `/user-manager/user/generate-voucher` against exactly those accounts using an existing voucher template on the router.
 - Downloads the resulting `.html` file via FTP (default path matches User Manager 5's generated-files location).
 - Converts it to PDF using headless Microsoft Edge / Chrome.
-- Optional **"run at login"** toggle using Windows Task Scheduler (`schtasks`).
+
+## Download
+
+Grab the latest `VoucherManager.exe` from the [Releases](../../releases) page — no Python install needed.
+
+The exe isn't code-signed yet, so Windows SmartScreen may show *"Windows protected your PC"*. Click **More info → Run anyway**.
 
 ## Requirements
 
@@ -24,7 +29,7 @@ A Tkinter GUI for batch-creating MikroTik User Manager hotspot vouchers, generat
 
 ### On this PC
 
-- Python 3 (standard library only — `socket`, `ssl`, `ftplib`, `tkinter`, `subprocess`)
+- Windows 10 or 11
 - Microsoft Edge or Google Chrome installed, for HTML → PDF conversion
 
 ## Usage
@@ -35,9 +40,24 @@ A Tkinter GUI for batch-creating MikroTik User Manager hotspot vouchers, generat
 4. Choose the group, profile, and voucher template, then batch-create the vouchers.
 5. The app downloads the generated HTML over FTP and converts it to PDF automatically.
 
+## Building from source
+
+Requires Python 3.12+, [Poetry](https://python-poetry.org/) and GNU Make. The app itself uses only the standard library; PyInstaller is a dev dependency.
+
+```sh
+make setup       # install dependencies
+make run         # run the app from source
+make build-exe   # build dist/VoucherManager.exe
+```
+
+The version lives in both `pyproject.toml` and `app/__init__.py`; the build fails if they differ.
+
 ## Security note
 
 This tool creates and displays **plaintext router credentials and voucher passwords**. Don't leave generated `.html`/`.pdf` files lying around after vouchers are printed — delete them from both the router and this PC.
 
 ## License
 
+This source code is licensed under the MIT Licence
+
+https://opensource.org/licenses/MIT

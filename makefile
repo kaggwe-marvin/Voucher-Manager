@@ -1,13 +1,16 @@
 ISCC := "C:\Program Files\Inno Setup 7\ISCC.exe"
 
-.PHONY: setup run clean help
+.PHONY: help setup run clean build-exe installer clean-build
 
 # Default target when you just type 'make'
 help:
 	@echo "Available commands:"
-	@echo "  make setup  - Install project dependencies using Poetry"
-	@echo "  make run    - Run the main script via Poetry"
-	@echo "  make clean  - Remove Python cache files"
+	@echo "  make setup       - Install project dependencies using Poetry"
+	@echo "  make run         - Run the main script via Poetry"
+	@echo "  make build-exe   - Build dist/VoucherManager.exe from VoucherManager.spec"
+	@echo "  make installer   - Build the exe, then the Inno Setup installer"
+	@echo "  make clean       - Remove Python cache files"
+	@echo "  make clean-build - Remove build/, dist/ and Output/"
 
 # Initialize dependencies
 setup:
@@ -19,16 +22,15 @@ run:
 
 # Clean up Python cache and temporary files
 clean:
-	rm -rf __pycache__
-	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type d -name "__pycache__" -prune -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 
+# The spec is the single source of build settings (version info, no UPX, etc.)
 build-exe:
-	poetry run pyinstaller --onefile --windowed --name VoucherManager main.py
- 
+	poetry run pyinstaller --noconfirm VoucherManager.spec
+
 installer: build-exe
 	$(ISCC) installer.iss
- 
+
 clean-build:
-	rmdir /s /q build dist Output 2>nul || true
-	del /q VoucherManager.spec 2>nul || true
+	rm -rf build dist Output
