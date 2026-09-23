@@ -21,5 +21,19 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "pyinstaller (>=6.22.3,<7.0.0)"
+    "pyinstaller (>=6.22.3,<7.0.0)",
+    "commitizen (>=4.19.0,<5.0.0)",
+    "pre-commit (>=4.6.2,<5.0.0)"
 ]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+# Reads/writes [project].version; version_files keeps app/__init__.py in step
+# so the PyInstaller spec's version check keeps passing after a bump.
+version_provider = "pep621"
+version_files = ["app/__init__.py:__version__"]
+tag_format = "v$version"
+update_changelog_on_bump = true
+changelog_file = "CHANGELOG.md"
+# While on 0.x, breaking changes bump the minor version instead of jumping to 1.0.0.
+major_version_zero = true

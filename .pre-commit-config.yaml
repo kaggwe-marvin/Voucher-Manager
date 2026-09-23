@@ -1,0 +1,7 @@
+# Installed by `make setup`. Rejects commit messages that aren't Conventional Commits.
+repos:
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.19.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
