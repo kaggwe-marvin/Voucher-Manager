@@ -12,16 +12,21 @@ from tkinter import filedialog, messagebox, ttk
 from app import __version__
 from app.gui.workflow import WorkflowParams, run_workflow
 from app.routeros.client import connect_and_login, fetch_names
+from app.utils import resource_path
 
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title(f"RouterOS Voucher Manager {__version__}")
+        self.title(f"Voucher Manager {__version__}")
         self.geometry("560x700")
         self.minsize(520, 480)
         self.resizable(True, True)
+        try:
+            self.iconbitmap(default=resource_path(os.path.join("assets", "icon.ico")))
+        except tk.TclError:
+            pass  # cosmetic only; never block startup over a missing icon
         self._build_form()
 
     PAD = 12

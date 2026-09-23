@@ -42,7 +42,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('assets/icon.ico', 'assets')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -74,4 +74,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     version=version_info,
+    icon='assets/icon.ico',
 )

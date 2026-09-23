@@ -1,12 +1,13 @@
 ISCC := "C:\Program Files\Inno Setup 7\ISCC.exe"
 
-.PHONY: help setup run clean build-exe installer clean-build
+.PHONY: help setup run clean icon build-exe installer clean-build
 
 # Default target when you just type 'make'
 help:
 	@echo "Available commands:"
 	@echo "  make setup       - Install project dependencies using Poetry"
 	@echo "  make run         - Run the main script via Poetry"
+	@echo "  make icon        - Regenerate assets/icon.ico and icon.png"
 	@echo "  make build-exe   - Build dist/VoucherManager.exe from VoucherManager.spec"
 	@echo "  make installer   - Build the exe, then the Inno Setup installer"
 	@echo "  make clean       - Remove Python cache files"
@@ -24,6 +25,9 @@ run:
 clean:
 	find . -type d -name "__pycache__" -prune -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
+
+icon:
+	poetry run python tools/make_icon.py
 
 # The spec is the single source of build settings (version info, no UPX, etc.)
 build-exe:
