@@ -16,11 +16,11 @@ jobs:
       run:
         shell: pwsh
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # commitizen needs full history and tags for release notes
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -55,9 +55,12 @@ jobs:
           New-Item -ItemType Directory release | Out-Null
           Copy-Item dist\VoucherManager.exe "release\VoucherManager-$env:VERSION-portable.exe"
           Copy-Item "Output\VoucherManager-Setup-$env:VERSION.exe" release\
-          Get-ChildItem release -File | ForEach-Object {
+          # Hash first, then write: piping straight into Out-File would create
+          # SHA256SUMS.txt mid-enumeration and try to hash the open file.
+          $sums = Get-ChildItem release -File | ForEach-Object {
             "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
-          } | Out-File -Encoding ascii release\SHA256SUMS.txt
+          }
+          $sums | Out-File -Encoding ascii release\SHA256SUMS.txt
           Get-Content release\SHA256SUMS.txt
 
       - name: Release notes from changelog
