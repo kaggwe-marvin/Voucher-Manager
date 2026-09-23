@@ -13,7 +13,12 @@ A Tkinter GUI for batch-creating MikroTik User Manager hotspot vouchers, and gen
 
 ## Download
 
-Grab the latest `VoucherManager.exe` from the [Releases](../../releases) page — no Python install needed.
+From the [Releases](../../releases) page, download either:
+
+- `VoucherManager-Setup-<version>.exe`: installer with Start Menu shortcut and uninstaller (recommended)
+- `VoucherManager-<version>-portable.exe`: single exe, nothing to install
+
+No Python install needed. Each release includes `SHA256SUMS.txt` to verify your download.
 
 The exe isn't code-signed yet, so Windows SmartScreen may show *"Windows protected your PC"*. Click **More info → Run anyway**.
 

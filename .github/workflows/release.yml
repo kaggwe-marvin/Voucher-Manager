@@ -1,0 +1,70 @@
+# Builds the exe and installer and publishes a GitHub Release whenever a
+# version tag is pushed. Tags come from `make bump` (commitizen), e.g. v0.2.0.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # commitizen needs full history and tags for release notes
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry and dependencies
+        run: |
+          pipx install poetry
+          poetry install --no-interaction
+        env:
+          PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
+
+      - name: Check tag matches project version
+        run: |
+          $version = poetry version --short
+          if ("v$version" -ne "${{ github.ref_name }}") {
+            throw "Tag ${{ github.ref_name }} does not match pyproject.toml version $version"
+          }
+          "VERSION=$version" | Out-File -Append $env:GITHUB_ENV
+
+      - name: Build exe
+        run: poetry run pyinstaller --noconfirm VoucherManager.spec
+
+      - name: Build installer
+        run: |
+          choco install innosetup --no-progress -y
+          $iscc = Get-ChildItem "C:\Program Files*\Inno Setup*\ISCC.exe" | Select-Object -First 1
+          if (-not $iscc) { throw "ISCC.exe not found after installing Inno Setup" }
+          & $iscc.FullName installer.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed with exit code $LASTEXITCODE" }
+
+      - name: Collect release files and checksums
+        run: |
+          New-Item -ItemType Directory release | Out-Null
+          Copy-Item dist\VoucherManager.exe "release\VoucherManager-$env:VERSION-portable.exe"
+          Copy-Item "Output\VoucherManager-Setup-$env:VERSION.exe" release\
+          Get-ChildItem release -File | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
+          } | Out-File -Encoding ascii release\SHA256SUMS.txt
+          Get-Content release\SHA256SUMS.txt
+
+      - name: Release notes from changelog
+        run: poetry run cz changelog "${{ github.ref_name }}" --dry-run | Out-File -Encoding utf8 RELEASE_NOTES.md
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Voucher Manager ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: release/*
